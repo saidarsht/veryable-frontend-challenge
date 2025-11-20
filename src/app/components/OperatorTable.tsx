@@ -1,12 +1,15 @@
 "use client";
 
 import {
+  Chip,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
   Paper,
 } from "@mui/material";
 import { useMemo, useState } from "react";
@@ -37,7 +40,16 @@ export function OperatorTable({ op }: OperatorTableProps) {
     sorted.sort((a, b) => {
       let comparison = 0;
       if (sortField === "name") {
-        comparison = a.firstName.localeCompare(b.firstName);
+        const firstNameCompare = a.firstName
+          .toLowerCase()
+          .localeCompare(b.firstName.toLowerCase());
+        if (firstNameCompare !== 0) {
+          comparison = firstNameCompare;
+        } else {
+          comparison = a.lastName
+            .toLowerCase()
+            .localeCompare(b.lastName.toLowerCase());
+        }
       } else if (sortField === "opsCompleted") {
         comparison = a.opsCompleted - b.opsCompleted;
       } else {
@@ -49,43 +61,131 @@ export function OperatorTable({ op }: OperatorTableProps) {
   }, [op.operators, sortField, sortDirection]);
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
+    <TableContainer
+      component={Paper}
+      elevation={0}
+      sx={{
+        mt: 2,
+        borderRadius: 2,
+        border: (theme) => `2px solid ${theme.palette.divider}`,
+        backgroundColor: "white",
+        overflow: "hidden",
+      }}
+    >
+      <Table size="small">
         <TableHead>
-          <TableRow>
+          <TableRow
+            sx={{
+              backgroundColor: (theme) => theme.palette.primary.main,
+            }}
+          >
             <TableCell
               onClick={() => handleSortClick("name")}
-              sx={{ cursor: "pointer" }}
+              sx={{
+                cursor: "pointer",
+                userSelect: "none",
+                color: "white",
+                fontWeight: 600,
+                "&:hover": {
+                  backgroundColor: "primary.dark",
+                },
+              }}
             >
-              Operator {sortField === "name" && (sortDirection === "asc" ? "↑" : "↓")}
+              Operator{" "}
+              {sortField === "name" && (sortDirection === "asc" ? "↑" : "↓")}
             </TableCell>
             <TableCell
+              align="right"
               onClick={() => handleSortClick("opsCompleted")}
-              sx={{ cursor: "pointer" }}
+              sx={{
+                cursor: "pointer",
+                userSelect: "none",
+                color: "white",
+                fontWeight: 600,
+                "&:hover": {
+                  backgroundColor: "primary.dark",
+                },
+              }}
             >
-              Ops Completed {sortField === "opsCompleted" && (sortDirection === "asc" ? "↑" : "↓")}
+              Ops Completed{" "}
+              {sortField === "opsCompleted" &&
+                (sortDirection === "asc" ? "↑" : "↓")}
             </TableCell>
             <TableCell
+              align="right"
               onClick={() => handleSortClick("reliability")}
-              sx={{ cursor: "pointer" }}
+              sx={{
+                cursor: "pointer",
+                userSelect: "none",
+                color: "white",
+                fontWeight: 600,
+                "&:hover": {
+                  backgroundColor: "primary.dark",
+                },
+              }}
             >
-              Reliability {sortField === "reliability" && (sortDirection === "asc" ? "↑" : "↓")}
+              Reliability{" "}
+              {sortField === "reliability" &&
+                (sortDirection === "asc" ? "↑" : "↓")}
+            </TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }}>
+              Endorsements
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedOperators.map((operator) => (
-            <TableRow key={operator.id}>
-              <TableCell>
-                {operator.firstName} {operator.lastName}
-              </TableCell>
-              <TableCell>{operator.opsCompleted}</TableCell>
-              <TableCell>{Math.round(operator.reliability * 100)}%</TableCell>
-            </TableRow>
-          ))}
+          {sortedOperators.map((operator, index) => {
+            const fullName = `${operator.firstName} ${operator.lastName}`;
+            const reliabilityPercent = Math.round(operator.reliability * 100);
+
+            return (
+              <TableRow
+                key={operator.id}
+                hover
+                sx={{
+                  backgroundColor: index % 2 === 0 ? "white" : "action.hover",
+                  "&:hover": {
+                    backgroundColor: "primary.light",
+                  },
+                }}
+              >
+                <TableCell>
+                  <Typography variant="body2" fontWeight={600}>
+                    {fullName}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="body2">
+                    {operator.opsCompleted}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="body2">
+                    {reliabilityPercent}%
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                    {operator.endorsements.map((endorsement) => (
+                      <Chip
+                        key={endorsement}
+                        label={endorsement}
+                        size="small"
+                        sx={{
+                          backgroundColor: "primary.light",
+                          color: "primary.dark",
+                          fontSize: "0.75rem",
+                          height: "24px",
+                        }}
+                      />
+                    ))}
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>
   );
 }
-
