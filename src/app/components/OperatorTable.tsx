@@ -92,7 +92,6 @@ export function OperatorTable({ op }: OperatorTableProps) {
   const closeDialog = () => {
     setDialogOpen(false);
     setActiveOperator(null);
-    setDialogError(null);
   };
 
   const handleSubmitCode = (code: string) => {

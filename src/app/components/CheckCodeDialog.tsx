@@ -1,13 +1,14 @@
 "use client";
 
 import {
-  Alert,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -30,44 +31,46 @@ export function CheckCodeDialog({
 }: CheckCodeDialogProps) {
   const [code, setCode] = useState("");
 
+  const handleClose = () => {
+    setCode("");
+    onClose();
+  };
+
   const handleSubmit = () => {
     if (!code.trim()) return;
     onSubmit(code);
     setCode("");
   };
 
-  const handleClose = () => {
-    setCode("");
-    onClose();
-  };
-
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
       <DialogTitle>
         {mode === "in" ? "Check In" : "Check Out"} for {opTitle}
       </DialogTitle>
       <DialogContent>
-        {errorMessage && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {errorMessage}
-          </Alert>
-        )}
-        <TextField
-          label="Code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          autoFocus
-          fullWidth
-          error={!!errorMessage}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit();
-            }
-          }}
-        />
+        <Stack spacing={2} mt={1}>
+          <Typography variant="body2" color="text.secondary">
+            Enter the {mode === "in" ? "check-in" : "check-out"} code provided
+            by your supervisor to complete this action.
+          </Typography>
+          <TextField
+            label="Code"
+            size="small"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            autoFocus
+          />
+          {errorMessage && (
+            <Typography variant="caption" color="error">
+              {errorMessage}
+            </Typography>
+          )}
+        </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose} color="inherit">
+          Cancel
+        </Button>
         <Button onClick={handleSubmit} variant="contained">
           Confirm
         </Button>
