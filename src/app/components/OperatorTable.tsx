@@ -121,7 +121,7 @@ export function OperatorTable({ op }: OperatorTableProps) {
         sx={{
           mt: 2,
           borderRadius: 2,
-          border: (theme) => `2px solid ${theme.palette.divider}`,
+          border: (theme) => `2px solid ${theme.palette.neutral.seven}`,
           backgroundColor: "white",
           overflow: "hidden",
         }}
@@ -201,7 +201,7 @@ export function OperatorTable({ op }: OperatorTableProps) {
                   key={operator.id}
                   hover
                   sx={{
-                    backgroundColor: index % 2 === 0 ? "white" : "action.hover",
+                    backgroundColor: index % 2 === 0 ? "white" : "neutral.nine",
                     "&:hover": {
                       backgroundColor: "primary.light",
                     },
@@ -234,6 +234,9 @@ export function OperatorTable({ op }: OperatorTableProps) {
                             color: "primary.dark",
                             fontSize: "0.75rem",
                             height: "24px",
+                            "& .MuiChip-label": {
+                              px: 1,
+                            },
                           }}
                         />
                       ))}

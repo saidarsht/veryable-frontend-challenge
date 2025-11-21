@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, Divider, Stack, Typography } from "@mui/material";
+
 import type { Op } from "../types";
 import { formatOpDate, formatTimeRange } from "@/utils/date";
 import { OperatorTable } from "./OperatorTable";
@@ -54,7 +55,7 @@ export function OpCard({ op }: OpCardProps) {
             </Stack>
           </Stack>
 
-          <Divider sx={{ my: 1 }} />
+          <Divider sx={{ my: 1, borderColor: "neutral.seven" }} />
 
           <OperatorTable op={op} />
         </Stack>
