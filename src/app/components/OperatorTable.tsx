@@ -50,6 +50,7 @@ export function OperatorTable({ op }: OperatorTableProps) {
     sorted.sort((a, b) => {
       let comparison = 0;
       if (sortField === "name") {
+        // Sort by first name then last name if tied
         const firstNameCompare = a.firstName
           .toLowerCase()
           .localeCompare(b.firstName.toLowerCase());
@@ -306,6 +307,7 @@ export function OperatorTable({ op }: OperatorTableProps) {
       </TableContainer>
 
       <CheckCodeDialog
+        // Reset dialog on change of operator or mode
         key={`${activeOperator?.id}-${dialogMode}`}
         open={dialogOpen}
         mode={dialogMode}

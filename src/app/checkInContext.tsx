@@ -65,6 +65,7 @@ export function CheckInProvider({ children }: { children: ReactNode }) {
         return { success: false, error: "Invalid check-in code." };
       }
 
+      // Nested by op then operator
       setState((prev) => {
         const opMap = prev[opId] ?? {};
         const existing = opMap[operatorId] ?? {};

@@ -48,6 +48,7 @@ export default function Home() {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return ops;
 
+    // Matches title, public id, or operator name
     return ops.filter((op) => {
       const matchesTitle = op.opTitle.toLowerCase().includes(query);
       const matchesPublicId = op.publicId.toLowerCase().includes(query);
