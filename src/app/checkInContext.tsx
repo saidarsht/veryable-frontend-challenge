@@ -3,63 +3,130 @@
 import {
   createContext,
   useContext,
+  useEffect,
+  useMemo,
+  useCallback,
   useState,
   ReactNode,
 } from "react";
 import type { CheckInState } from "./types";
 
+const STORAGE_KEY = "veryable-ops-checkins";
+
+type CheckResult = { success: true } | { success: false; error: string };
+
 interface CheckInContextValue {
   state: CheckInState;
-  checkIn: (opId: number, operatorId: number, code: string, expectedCode: string) => boolean;
-  checkOut: (opId: number, operatorId: number, code: string, expectedCode: string) => boolean;
+  checkIn: (
+    opId: number,
+    operatorId: number,
+    enteredCode: string,
+    expectedCode: string
+  ) => CheckResult;
+  checkOut: (
+    opId: number,
+    operatorId: number,
+    enteredCode: string,
+    expectedCode: string
+  ) => CheckResult;
 }
 
-const CheckInContext = createContext<CheckInContextValue | undefined>(undefined);
+const CheckInContext = createContext<CheckInContextValue | undefined>(
+  undefined
+);
 
 export function CheckInProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<CheckInState>({});
-
-  const checkIn = (opId: number, operatorId: number, code: string, expectedCode: string): boolean => {
-    if (code.trim() !== expectedCode.trim()) {
-      return false;
+  const [state, setState] = useState<CheckInState>(() => {
+    if (typeof window === "undefined") return {};
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return {};
+      }
     }
+    return {};
+  });
 
-    setState((prev) => ({
-      ...prev,
-      [opId]: {
-        ...(prev[opId] || {}),
-        [operatorId]: {
-          checkedInAt: new Date().toISOString(),
-        },
-      },
-    }));
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
 
-    return true;
-  };
+  const checkIn = useCallback(
+    (
+      opId: number,
+      operatorId: number,
+      enteredCode: string,
+      expectedCode: string
+    ): CheckResult => {
+      if (enteredCode.trim() !== expectedCode.trim()) {
+        return { success: false, error: "Invalid check-in code." };
+      }
 
-  const checkOut = (opId: number, operatorId: number, code: string, expectedCode: string): boolean => {
-    if (code.trim() !== expectedCode.trim()) {
-      return false;
-    }
+      setState((prev) => {
+        const opMap = prev[opId] ?? {};
+        const existing = opMap[operatorId] ?? {};
+        return {
+          ...prev,
+          [opId]: {
+            ...opMap,
+            [operatorId]: {
+              ...existing,
+              checkedInAt: new Date().toISOString(),
+            },
+          },
+        };
+      });
 
-    setState((prev) => ({
-      ...prev,
-      [opId]: {
-        ...(prev[opId] || {}),
-        [operatorId]: {
-          ...(prev[opId]?.[operatorId] || {}),
-          checkedOutAt: new Date().toISOString(),
-        },
-      },
-    }));
+      return { success: true };
+    },
+    []
+  );
 
-    return true;
-  };
+  const checkOut = useCallback(
+    (
+      opId: number,
+      operatorId: number,
+      enteredCode: string,
+      expectedCode: string
+    ): CheckResult => {
+      if (enteredCode.trim() !== expectedCode.trim()) {
+        return { success: false, error: "Invalid check-out code." };
+      }
+
+      setState((prev) => {
+        const opMap = prev[opId] ?? {};
+        const existing = opMap[operatorId] ?? {};
+        return {
+          ...prev,
+          [opId]: {
+            ...opMap,
+            [operatorId]: {
+              ...existing,
+              checkedOutAt: new Date().toISOString(),
+            },
+          },
+        };
+      });
+
+      return { success: true };
+    },
+    []
+  );
+
+  const value = useMemo<CheckInContextValue>(
+    () => ({
+      state,
+      checkIn,
+      checkOut,
+    }),
+    [state, checkIn, checkOut]
+  );
 
   return (
-    <CheckInContext.Provider value={{ state, checkIn, checkOut }}>
-      {children}
-    </CheckInContext.Provider>
+    <CheckInContext.Provider value={value}>{children}</CheckInContext.Provider>
   );
 }
 
@@ -70,4 +137,3 @@ export function useCheckIn() {
   }
   return ctx;
 }
-
